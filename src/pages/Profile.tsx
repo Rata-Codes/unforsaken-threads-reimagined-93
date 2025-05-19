@@ -120,7 +120,6 @@ const Profile = () => {
                         </div>
                         <p className="text-sm">{order.fields?.Products}</p>
                         <div className="flex justify-between mt-2 text-sm">
-                          <span>Quantity: {order.fields?.TotalQuantity}</span>
                           <span>Total: ₹{order.fields?.TotalAmount?.toFixed(2)}</span>
                         </div>
                       </div>

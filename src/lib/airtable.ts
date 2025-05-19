@@ -121,7 +121,7 @@ export async function getOrdersByCustomerId(cid: string) {
 }
 
 export async function createOrder(order: Order) {
-  // Remove TotalQuantity field as it's no longer needed
+  // Note: TotalQuantity field has been removed from the order table
   return fetchFromAirtable(ORDER_BASE_ID, ORDER_TABLE_ID, 'POST', '', {
     records: [{ fields: order.fields }]
   });

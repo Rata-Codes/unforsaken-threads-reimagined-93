@@ -99,7 +99,6 @@ const OrderManagement = () => {
                   <TableRow>
                     <TableHead>Order ID</TableHead>
                     <TableHead>Products</TableHead>
-                    <TableHead>Total Quantity</TableHead>
                     <TableHead>Total Amount</TableHead>
                     <TableHead>Customer ID</TableHead>
                     <TableHead>Date</TableHead>
@@ -115,7 +114,6 @@ const OrderManagement = () => {
                         <TableCell className="max-w-[300px] truncate">
                           {order.fields?.Products}
                         </TableCell>
-                        <TableCell>{order.fields?.TotalQuantity}</TableCell>
                         <TableCell>₹{Number(order.fields?.TotalAmount).toFixed(2)}</TableCell>
                         <TableCell>{order.fields?.CID}</TableCell>
                         <TableCell>
@@ -125,7 +123,7 @@ const OrderManagement = () => {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-4">
+                      <TableCell colSpan={5} className="text-center py-4">
                         {searchQuery ? "No orders match your search." : "No orders found."}
                       </TableCell>
                     </TableRow>
