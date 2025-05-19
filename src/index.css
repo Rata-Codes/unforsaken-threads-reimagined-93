@@ -106,6 +106,19 @@
     animation: rotate-y 1s ease-out;
   }
   
+  /* Barrel Carousel Styles */
+  .carousel-container {
+    transform-style: preserve-3d;
+  }
+  
+  .rotate-y-30deg {
+    transform: rotateY(30deg);
+  }
+  
+  .rotate-y-neg-30deg {
+    transform: rotateY(-30deg);
+  }
+  
   /* 3D product showcase */
   .product-3d-container {
     perspective: 1000px;
@@ -120,3 +133,4 @@
     transform: rotateY(15deg) rotateX(5deg);
   }
 }
+

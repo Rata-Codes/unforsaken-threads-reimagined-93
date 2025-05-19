@@ -3,7 +3,7 @@ import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import ProductCarousel from "@/components/ProductCarousel";
+import BarrelCarousel from "@/components/BarrelCarousel";
 import { Filter, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -94,6 +94,54 @@ const productData = [
   }
 ];
 
+// Define carousel products with more details
+const carouselProducts = [
+  {
+    id: "1",
+    name: "Minimal Heavyweight Hoodie",
+    price: 65,
+    originalPrice: 74,
+    defaultImage: "/lovable-uploads/b9ef63f9-198a-44f4-9d09-475b2e17ac6c.png",
+    hoverImage: "/lovable-uploads/4e8347fd-85f2-4e6b-a943-d0a3da0b4f56.png",
+    description: "Our minimal heavyweight hoodie offers premium comfort and style with its high-quality fabric and minimalist design.",
+    sizes: ["S", "M", "L", "XL"],
+    stock: 25
+  },
+  {
+    id: "2",
+    name: "Modern Oversized Tee",
+    price: 42,
+    originalPrice: 53,
+    defaultImage: "/lovable-uploads/bddb910d-c3d0-45f1-9131-cfcbc4f56ec1.png",
+    hoverImage: "/lovable-uploads/4e8347fd-85f2-4e6b-a943-d0a3da0b4f56.png",
+    description: "Our modern oversized tee combines comfort with contemporary style. The relaxed fit makes it perfect for any casual occasion.",
+    sizes: ["S", "M", "L", "XL"],
+    stock: 42
+  },
+  {
+    id: "3",
+    name: "Iconic Washed Oversized Tee",
+    price: 47,
+    originalPrice: 57,
+    defaultImage: "/lovable-uploads/e6888aba-7c47-4b1a-8b66-1ebca0b77420.png",
+    hoverImage: "/lovable-uploads/4e8347fd-85f2-4e6b-a943-d0a3da0b4f56.png",
+    description: "The iconic washed oversized tee features a vintage look and ultra-soft fabric. Each piece has a unique wash pattern.",
+    sizes: ["S", "M", "L", "XL"],
+    stock: 18
+  },
+  {
+    id: "4",
+    name: "Celestial 2.0 Heavyweight Tee",
+    price: 45,
+    originalPrice: 53,
+    defaultImage: "/lovable-uploads/4e8347fd-85f2-4e6b-a943-d0a3da0b4f56.png",
+    hoverImage: "/lovable-uploads/4e8347fd-85f2-4e6b-a943-d0a3da0b4f56.png",
+    description: "The celestial 2.0 heavyweight tee is crafted from premium cotton with a substantial feel and perfect drape.",
+    sizes: ["S", "M", "L", "XL"],
+    stock: 35
+  }
+];
+
 type SortOption = "featured" | "price-asc" | "price-desc" | "newest";
 
 const Shop = () => {
@@ -101,7 +149,7 @@ const Shop = () => {
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>("featured");
   const [priceRange, setPriceRange] = useState({ min: 0, max: 100 });
-  const [activeView, setActiveView] = useState<'grid' | 'carousel'>('grid');
+  const [activeView, setActiveView] = useState<'grid' | 'barrel'>('barrel');
   
   // Filter products based on selected filters
   const filteredProducts = productData.filter(product => {
@@ -162,18 +210,18 @@ const Shop = () => {
               Grid View
             </Button>
             <Button
-              variant={activeView === 'carousel' ? "default" : "outline"}
-              onClick={() => setActiveView('carousel')}
+              variant={activeView === 'barrel' ? "default" : "outline"}
+              onClick={() => setActiveView('barrel')}
               className="rounded-none bg-transparent hover:bg-black/5 text-black"
             >
-              Carousel View
+              Barrel View
             </Button>
           </div>
         </div>
         
-        {/* Carousel View */}
-        {activeView === 'carousel' && (
-          <ProductCarousel />
+        {/* Barrel Carousel View */}
+        {activeView === 'barrel' && (
+          <BarrelCarousel products={carouselProducts} />
         )}
         
         {/* Grid View with Filters */}

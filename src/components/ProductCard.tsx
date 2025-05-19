@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/components/ui/use-toast";
 
 interface ProductCardProps {
   id: string;
@@ -24,6 +25,19 @@ const ProductCard = ({
 }: ProductCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const { toast } = useToast();
+
+  const handleQuickAdd = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsAddingToCart(true);
+    
+    toast({
+      title: "Added to cart",
+      description: `${name} has been added to your cart.`,
+    });
+    
+    setTimeout(() => setIsAddingToCart(false), 1000);
+  };
 
   return (
     <div 
@@ -64,11 +78,7 @@ const ProductCard = ({
           >
             <button 
               className="w-full bg-white text-black text-xs uppercase tracking-wider py-2 hover:bg-neutral-200 transition-colors"
-              onClick={(e) => {
-                e.preventDefault();
-                setIsAddingToCart(true);
-                setTimeout(() => setIsAddingToCart(false), 1000);
-              }}
+              onClick={handleQuickAdd}
             >
               {isAddingToCart ? "Added!" : "Quick Add"}
             </button>

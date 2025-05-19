@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import StoreEntrance from "@/components/StoreEntrance";
+import LoadingScreen from "@/components/LoadingScreen";
 import VideoBackground from "@/components/VideoBackground";
 import FeaturedProducts from "@/components/FeaturedProducts";
 import CollectionBanner from "@/components/CollectionBanner";
@@ -11,32 +11,32 @@ import Newsletter from "@/components/Newsletter";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
-  const [showEntrance, setShowEntrance] = useState(true);
-  const [entranceCompleted, setEntranceCompleted] = useState(false);
+  const [showLoading, setShowLoading] = useState(true);
+  const [loadingCompleted, setLoadingCompleted] = useState(false);
   const isMobile = useIsMobile();
   
-  // Skip entrance animation if the page is refreshed (using sessionStorage)
+  // Skip loading screen if the page is refreshed (using sessionStorage)
   useEffect(() => {
     const hasVisited = sessionStorage.getItem("hasVisitedBefore");
     if (hasVisited) {
-      setShowEntrance(false);
-      setEntranceCompleted(true);
+      setShowLoading(false);
+      setLoadingCompleted(true);
     } else {
       sessionStorage.setItem("hasVisitedBefore", "true");
     }
   }, []);
   
-  const handleEntranceComplete = () => {
-    setShowEntrance(false);
-    setEntranceCompleted(true);
+  const handleLoadingComplete = () => {
+    setShowLoading(false);
+    setLoadingCompleted(true);
   };
   
-  if (showEntrance) {
-    return <StoreEntrance onComplete={handleEntranceComplete} />;
+  if (showLoading) {
+    return <LoadingScreen onComplete={handleLoadingComplete} />;
   }
 
   return (
-    <div className={`min-h-screen flex flex-col ${entranceCompleted ? "animate-fade-in" : ""}`}>
+    <div className={`min-h-screen flex flex-col ${loadingCompleted ? "animate-fade-in" : ""}`}>
       <Navbar />
       
       {/* Hero Section */}
