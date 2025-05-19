@@ -54,7 +54,7 @@ const Profile = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="md:col-span-1">
-              <Card className="p-6">
+              <Card className="p-6 hover:shadow-md transition-shadow">
                 <h2 className="font-medium text-lg mb-4">Personal Information</h2>
                 
                 <div className="space-y-3">
@@ -74,6 +74,21 @@ const Profile = () => {
                   </div>
                   
                   <div>
+                    <p className="text-sm text-gray-500">City</p>
+                    <p className="font-medium">{user?.fields?.City || "N/A"}</p>
+                  </div>
+                  
+                  <div>
+                    <p className="text-sm text-gray-500">State</p>
+                    <p className="font-medium">{user?.fields?.State || "N/A"}</p>
+                  </div>
+                  
+                  <div>
+                    <p className="text-sm text-gray-500">Zipcode</p>
+                    <p className="font-medium">{user?.fields?.Zipcode || "N/A"}</p>
+                  </div>
+                  
+                  <div>
                     <p className="text-sm text-gray-500">Username</p>
                     <p className="font-medium">{user?.fields?.Username}</p>
                   </div>
@@ -84,7 +99,7 @@ const Profile = () => {
             </div>
             
             <div className="md:col-span-2">
-              <Card className="p-6">
+              <Card className="p-6 hover:shadow-md transition-shadow">
                 <h2 className="font-medium text-lg mb-4">Order History</h2>
                 
                 {isLoading ? (
@@ -101,10 +116,8 @@ const Profile = () => {
                         </div>
                         <p className="text-sm">{order.fields?.Products}</p>
                         <div className="flex justify-between mt-2 text-sm">
+                          <span>Quantity: {order.fields?.TotalQuantity}</span>
                           <span>Total: ${order.fields?.TotalAmount?.toFixed(2)}</span>
-                          <Button variant="link" className="p-0 h-auto" onClick={() => navigate(`/order/${order.fields?.OrderID}`)}>
-                            View Details
-                          </Button>
                         </div>
                       </div>
                     ))}
@@ -113,7 +126,7 @@ const Profile = () => {
                   <p>You haven't placed any orders yet.</p>
                 )}
                 
-                <Button className="mt-6 w-full" onClick={() => navigate("/shop")}>
+                <Button className="mt-6 w-full bg-black hover:bg-black/80 text-white" onClick={() => navigate("/shop")}>
                   Continue Shopping
                 </Button>
               </Card>

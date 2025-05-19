@@ -10,25 +10,17 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { ChevronLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
 import { generateOrderId, createOrder, updateCustomer } from "@/lib/airtable";
 import { useToast } from "@/components/ui/use-toast";
 
-interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  size: string;
-  quantity: number;
-}
-
 const Checkout = () => {
   const { isAuthenticated, user } = useAuth();
+  const { cartItems, clearCart, cartTotal } = useCart();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [total, setTotal] = useState(0);
   
   // Form state
@@ -60,40 +52,32 @@ const Checkout = () => {
         email: user.fields.Username || "",
         phone: user.fields.Phone || "",
         address: user.fields.Address || "",
+        city: user.fields.City || "",
+        state: user.fields.State || "",
+        zipCode: user.fields.Zipcode || "",
       }));
     }
   }, [isAuthenticated, user]);
   
-  // Get cart items from session storage
+  // Calculate total with shipping
   useEffect(() => {
-    const storedItems = sessionStorage.getItem("cartItems");
-    const storedTotal = sessionStorage.getItem("cartTotal");
-    
-    if (storedItems) {
-      try {
-        setCartItems(JSON.parse(storedItems));
-      } catch (error) {
-        console.error("Error parsing cart items:", error);
-        navigate("/cart");
-      }
-    }
-    
-    if (storedTotal) {
-      setTotal(parseFloat(storedTotal));
-    }
-    
-    // If no items or not authenticated, redirect to cart
-    if (!storedItems || !isAuthenticated) {
+    const shipping = cartTotal >= 100 ? 0 : 10;
+    setTotal(cartTotal + shipping);
+  }, [cartTotal]);
+  
+  // If no items or not authenticated, redirect to cart
+  useEffect(() => {
+    if (!cartItems.length || !isAuthenticated) {
       navigate("/cart");
     }
-  }, [isAuthenticated, navigate]);
+  }, [cartItems.length, isAuthenticated, navigate]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
   
-  const formatProductsString = (items: CartItem[]) => {
+  const formatProductsString = (items: typeof cartItems) => {
     const itemsByName: Record<string, { [size: string]: number }> = {};
     
     items.forEach(item => {
@@ -174,13 +158,20 @@ const Checkout = () => {
           ? `${existingOrderIds},${orderId}` 
           : orderId;
         
-        await updateCustomer(user.id, { OrderID: updatedOrderIds });
+        await updateCustomer(user.id, {
+          OrderID: updatedOrderIds,
+          // Update customer address info if it has changed
+          Address: formData.address,
+          City: formData.city,
+          State: formData.state,
+          Zipcode: formData.zipCode,
+          Phone: formData.phone
+        });
         console.log("Customer order IDs updated");
       }
       
-      // Clear cart from session storage
-      sessionStorage.removeItem("cartItems");
-      sessionStorage.removeItem("cartTotal");
+      // Clear cart
+      clearCart();
       
       // Store order ID for confirmation page
       sessionStorage.setItem("lastOrderId", orderId);

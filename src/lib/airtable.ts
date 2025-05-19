@@ -20,6 +20,9 @@ export interface Customer {
     OrderID?: string;
     Phone?: string;
     Address?: string;
+    City?: string;
+    State?: string;
+    Zipcode?: string;
     Username?: string;
     Password?: string;
   };

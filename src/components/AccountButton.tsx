@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu, 
@@ -16,6 +16,11 @@ import { useAuth } from "@/contexts/AuthContext";
 const AccountButton = () => {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const { isAuthenticated, user, logout, isAdmin } = useAuth();
+  const navigate = useNavigate();
+
+  const handleProfileClick = () => {
+    navigate("/profile");
+  };
 
   return (
     <>
@@ -31,8 +36,8 @@ const AccountButton = () => {
               <span className="font-medium">{user?.fields?.Name || 'User'}</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link to="/profile">Profile</Link>
+            <DropdownMenuItem onClick={handleProfileClick}>
+              Profile
             </DropdownMenuItem>
             {isAdmin && (
               <DropdownMenuItem asChild>

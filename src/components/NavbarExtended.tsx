@@ -6,11 +6,14 @@ import { Button } from "@/components/ui/button";
 import Logo from "@/components/Logo";
 import { Menu, X, ShoppingCart } from "lucide-react";
 import AccountButton from "./AccountButton";
+import { useCart } from "@/contexts/CartContext";
+import { Badge } from "@/components/ui/badge";
 
 const NavbarExtended = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { cartCount } = useCart();
 
   // Update scrolled state on scroll
   useEffect(() => {
@@ -28,20 +31,23 @@ const NavbarExtended = () => {
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location]);
-
+  
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-40 transition-all duration-300",
+        "fixed top-0 left-0 right-0 z-40 transition-all duration-300 border-b",
         isScrolled
-          ? "bg-white text-black py-3 shadow-sm"
-          : "bg-transparent text-white py-5"
+          ? "bg-white text-black py-3 border-black/10"
+          : "bg-transparent text-white py-5 border-transparent"
       )}
     >
       <div className="container px-4 flex justify-between items-center">
         {/* Logo */}
         <Link to="/" className="z-50">
-          <Logo color={isScrolled || isMobileMenuOpen ? "#000000" : "#FFFFFF"} />
+          <Logo 
+            color={isScrolled || isMobileMenuOpen ? "#000000" : "#FFFFFF"} 
+            animated={true}
+          />
         </Link>
 
         {/* Desktop Navigation */}
@@ -49,8 +55,8 @@ const NavbarExtended = () => {
           <Link
             to="/"
             className={cn(
-              "nav-link text-sm uppercase tracking-wide",
-              location.pathname === "/" && "active"
+              "nav-link text-sm uppercase tracking-wide hover:opacity-70 transition-opacity",
+              location.pathname === "/" && "font-bold"
             )}
           >
             Home
@@ -58,8 +64,8 @@ const NavbarExtended = () => {
           <Link
             to="/shop"
             className={cn(
-              "nav-link text-sm uppercase tracking-wide",
-              location.pathname === "/shop" && "active"
+              "nav-link text-sm uppercase tracking-wide hover:opacity-70 transition-opacity",
+              location.pathname === "/shop" && "font-bold"
             )}
           >
             Shop
@@ -67,8 +73,8 @@ const NavbarExtended = () => {
           <Link
             to="/about"
             className={cn(
-              "nav-link text-sm uppercase tracking-wide",
-              location.pathname === "/about" && "active"
+              "nav-link text-sm uppercase tracking-wide hover:opacity-70 transition-opacity",
+              location.pathname === "/about" && "font-bold"
             )}
           >
             About
@@ -78,10 +84,17 @@ const NavbarExtended = () => {
           <div className="flex items-center space-x-4">
             <AccountButton />
             
-            {/* Cart Icon */}
-            <Link to="/cart">
+            {/* Cart Icon with Badge */}
+            <Link to="/cart" className="relative">
               <Button variant="ghost" size="icon" className="rounded-full">
                 <ShoppingCart className="h-5 w-5" />
+                {cartCount > 0 && (
+                  <Badge 
+                    className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 bg-black text-white rounded-full"
+                  >
+                    {cartCount}
+                  </Badge>
+                )}
               </Button>
             </Link>
           </div>
@@ -91,7 +104,8 @@ const NavbarExtended = () => {
         <div className="flex items-center space-x-4 md:hidden">
           <AccountButton />
           
-          <Link to="/cart">
+          {/* Cart Icon with Badge */}
+          <Link to="/cart" className="relative">
             <Button 
               variant="ghost" 
               size="icon"
@@ -101,6 +115,13 @@ const NavbarExtended = () => {
               }}
             >
               <ShoppingCart className="h-5 w-5" />
+              {cartCount > 0 && (
+                <Badge 
+                  className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 bg-black text-white rounded-full"
+                >
+                  {cartCount}
+                </Badge>
+              )}
             </Button>
           </Link>
           
@@ -141,6 +162,13 @@ const NavbarExtended = () => {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 About
+              </Link>
+              <Link
+                to="/profile"
+                className="text-xl uppercase tracking-wide"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Profile
               </Link>
               <Link
                 to="/cart"
