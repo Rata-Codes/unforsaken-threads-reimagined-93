@@ -13,6 +13,7 @@ import { User } from "lucide-react";
 import AccountDialog from "./AccountDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const AccountButton = () => {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
@@ -23,16 +24,29 @@ const AccountButton = () => {
   const handleProfileClick = () => {
     navigate("/profile");
   };
+  
+  const getInitials = () => {
+    if (!user?.fields?.Name) return "U";
+    return user.fields.Name.split(" ")
+      .map(n => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   return (
     <>
       {isAuthenticated ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full relative">
-              <User className="h-5 w-5" />
+            <Button variant="ghost" size="icon" className="rounded-full relative p-0">
+              <Avatar className="h-9 w-9 border border-gray-200">
+                <AvatarFallback className={isAdmin ? "bg-blue-500 text-white" : "bg-black text-white"}>
+                  {getInitials()}
+                </AvatarFallback>
+              </Avatar>
               {isAdmin && (
-                <Badge variant="info" className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center">
+                <Badge variant="success" className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center">
                   A
                 </Badge>
               )}

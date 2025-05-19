@@ -27,8 +27,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
+  // Derive isAuthenticated and isAdmin from user
   const isAuthenticated = !!user;
-  const isAdmin = user?.fields?.Username === "admincontrol@5678";
+  const isAdmin = isAuthenticated && user?.fields?.Username === "admincontrol@5678";
 
   useEffect(() => {
     // Check for stored auth on mount

@@ -33,7 +33,6 @@ export interface Order {
   fields?: {
     OrderID?: string;
     Products?: string;
-    TotalQuantity?: number | string;
     TotalAmount?: number;
     CID?: string;
     Date?: string;
@@ -122,11 +121,7 @@ export async function getOrdersByCustomerId(cid: string) {
 }
 
 export async function createOrder(order: Order) {
-  // Ensure TotalQuantity is a string
-  if (order.fields && typeof order.fields.TotalQuantity === 'number') {
-    order.fields.TotalQuantity = String(order.fields.TotalQuantity);
-  }
-
+  // Remove TotalQuantity field as it's no longer needed
   return fetchFromAirtable(ORDER_BASE_ID, ORDER_TABLE_ID, 'POST', '', {
     records: [{ fields: order.fields }]
   });

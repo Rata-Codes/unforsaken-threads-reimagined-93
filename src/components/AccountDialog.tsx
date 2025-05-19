@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
@@ -26,6 +26,9 @@ const AccountDialog = ({
         <DialogTitle className="text-center">
           {activeTab === "login" ? "Login to Your Account" : "Create an Account"}
         </DialogTitle>
+        <DialogDescription className="text-center">
+          {activeTab === "login" ? "Enter your credentials to login" : "Fill in the details to create an account"}
+        </DialogDescription>
         
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "login" | "signup")} className="w-full">
           <TabsList className="grid grid-cols-2 w-full">
