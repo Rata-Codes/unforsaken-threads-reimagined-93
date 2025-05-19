@@ -80,7 +80,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         toast({
           title: "Cart updated",
-          description: `${newItem.name} (${newItem.size}) quantity updated in cart.`
+          description: `₹${newItem.name} (${newItem.size}) quantity updated in cart.`
         });
         
         return updatedItems;

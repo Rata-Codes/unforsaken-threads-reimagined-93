@@ -126,11 +126,11 @@ const Checkout = () => {
       const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
       const currentDate = new Date();
       
-      // Make sure TotalQuantity is a number
+      // Convert TotalQuantity to string for Airtable
       const orderData = {
         OrderID: orderId,
         Products: formatProductsString(cartItems),
-        TotalQuantity: Number(totalQuantity), // Ensure this is a number
+        TotalQuantity: String(totalQuantity), // Ensure this is a string
         TotalAmount: Number(total),
         CID: user.fields.CID,
         Date: currentDate.toISOString().split('T')[0],

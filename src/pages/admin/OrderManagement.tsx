@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { getOrders, Order } from "@/lib/airtable";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Search, ChevronLeft } from "lucide-react";
 
 const OrderManagement = () => {
@@ -108,12 +109,14 @@ const OrderManagement = () => {
                   {filteredOrders.length > 0 ? (
                     filteredOrders.map((order) => (
                       <TableRow key={order.id}>
-                        <TableCell>{order.fields?.OrderID}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{order.fields?.OrderID}</Badge>
+                        </TableCell>
                         <TableCell className="max-w-[300px] truncate">
                           {order.fields?.Products}
                         </TableCell>
                         <TableCell>{order.fields?.TotalQuantity}</TableCell>
-                        <TableCell>${order.fields?.TotalAmount?.toFixed(2)}</TableCell>
+                        <TableCell>₹{Number(order.fields?.TotalAmount).toFixed(2)}</TableCell>
                         <TableCell>{order.fields?.CID}</TableCell>
                         <TableCell>
                           {order.fields?.Date} {order.fields?.Time}

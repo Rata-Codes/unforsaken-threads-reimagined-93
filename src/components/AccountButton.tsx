@@ -12,6 +12,7 @@ import {
 import { User } from "lucide-react";
 import AccountDialog from "./AccountDialog";
 import { useAuth } from "@/contexts/AuthContext";
+import { Badge } from "@/components/ui/badge";
 
 const AccountButton = () => {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
@@ -28,8 +29,13 @@ const AccountButton = () => {
       {isAuthenticated ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full">
+            <Button variant="ghost" size="icon" className="rounded-full relative">
               <User className="h-5 w-5" />
+              {isAdmin && (
+                <Badge variant="info" className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center">
+                  A
+                </Badge>
+              )}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
