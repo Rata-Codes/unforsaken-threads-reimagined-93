@@ -121,7 +121,6 @@ export async function getOrdersByCustomerId(cid: string) {
 }
 
 export async function createOrder(order: Order) {
-  // Note: TotalQuantity field has been removed from the order table
   return fetchFromAirtable(ORDER_BASE_ID, ORDER_TABLE_ID, 'POST', '', {
     records: [{ fields: order.fields }]
   });
@@ -130,4 +129,10 @@ export async function createOrder(order: Order) {
 // Helper function to generate order ID
 export function generateOrderId() {
   return `TBE-${Math.floor(100000 + Math.random() * 900000)}`;
+}
+
+// Helper function to append new order ID to existing order IDs
+export function appendOrderId(existingOrderIds: string | undefined, newOrderId: string): string {
+  if (!existingOrderIds) return newOrderId;
+  return `${existingOrderIds},${newOrderId}`;
 }

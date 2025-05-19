@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -11,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { ChevronLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
-import { generateOrderId, createOrder, updateCustomer } from "@/lib/airtable";
+import { generateOrderId, createOrder, updateCustomer, appendOrderId } from "@/lib/airtable";
 import { useToast } from "@/components/ui/use-toast";
 
 const Checkout = () => {
@@ -123,16 +122,17 @@ const Checkout = () => {
       console.log("Generated order ID:", orderId);
       
       // Create order in Airtable
-      const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
       const currentDate = new Date();
+      const formattedDate = currentDate.toISOString().split('T')[0];
+      const formattedTime = currentDate.toTimeString().split(' ')[0];
       
-      // Convert TotalQuantity to string for Airtable
       const orderData = {
         OrderID: orderId,
         Products: formatProductsString(cartItems),
-        TotalQuantity: String(totalQuantity), // Ensure this is a string
         TotalAmount: Number(total),
         CID: user.fields.CID,
+        Date: formattedDate,
+        Time: formattedTime
       };
       
       console.log("Creating order with data:", orderData);
@@ -146,10 +146,8 @@ const Checkout = () => {
       // Update customer's order IDs
       if (user.id) {
         console.log("Updating customer order IDs...");
-        const existingOrderIds = user.fields.OrderID || "";
-        const updatedOrderIds = existingOrderIds 
-          ? `${existingOrderIds},${orderId}` 
-          : orderId;
+        const existingOrderIds = user.fields.OrderID;
+        const updatedOrderIds = appendOrderId(existingOrderIds, orderId);
         
         await updateCustomer(user.id, {
           OrderID: updatedOrderIds,

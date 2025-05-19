@@ -49,7 +49,7 @@ const Profile = () => {
       <main className="flex-grow pt-16">
         <div className="container px-4 py-8 max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-medium">Your Profile</h1>
+            <h1 className="text-3xl font-medium">My Profile</h1>
             <Button variant="outline" onClick={logout}>Logout</Button>
           </div>
           

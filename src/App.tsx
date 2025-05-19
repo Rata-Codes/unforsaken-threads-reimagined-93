@@ -24,13 +24,13 @@ const queryClient = new QueryClient();
 // Admin shortcut component
 const AdminShortcut = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, isAdmin } = useAuth();
+  const { isAuthenticated, isAdmin, user } = useAuth();
   
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ctrl+Shift+A for Admin Access
       if (e.ctrlKey && e.shiftKey && e.key === 'A') {
-        if (isAuthenticated && isAdmin) {
+        if (isAuthenticated && user?.fields?.Username === "admincontrol@5678") {
           navigate('/admin');
         }
       }
@@ -38,7 +38,7 @@ const AdminShortcut = () => {
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [navigate, isAuthenticated, isAdmin]);
+  }, [navigate, isAuthenticated, isAdmin, user]);
   
   return null;
 };

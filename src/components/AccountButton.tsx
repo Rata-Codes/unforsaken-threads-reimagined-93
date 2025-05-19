@@ -17,10 +17,9 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const AccountButton = () => {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const isAdmin = isAuthenticated && user?.fields?.Username === "admincontrol@5678";
-
+  
   const handleProfileClick = () => {
     navigate("/profile");
   };
@@ -58,7 +57,7 @@ const AccountButton = () => {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleProfileClick}>
-              Profile
+              My Profile
             </DropdownMenuItem>
             {isAdmin && (
               <DropdownMenuItem asChild>
