@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { getOrdersByCustomerId, Order } from "@/lib/airtable";
 import { formatDistanceToNow } from "date-fns";
+import { Badge } from "@/components/ui/badge";
 
 const Profile = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -108,8 +109,11 @@ const Profile = () => {
                   <div className="space-y-4">
                     {orders.map((order) => (
                       <div key={order.id} className="border-b pb-4">
-                        <div className="flex justify-between mb-2">
-                          <span className="font-medium">Order #{order.fields?.OrderID}</span>
+                        <div className="flex justify-between items-center mb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">Order #{order.fields?.OrderID}</span>
+                            <Badge variant="secondary" className="ml-2">Delivered</Badge>
+                          </div>
                           <span className="text-sm text-gray-500">
                             {order.fields?.Date && formatDistanceToNow(new Date(order.fields.Date), { addSuffix: true })}
                           </span>
@@ -117,7 +121,7 @@ const Profile = () => {
                         <p className="text-sm">{order.fields?.Products}</p>
                         <div className="flex justify-between mt-2 text-sm">
                           <span>Quantity: {order.fields?.TotalQuantity}</span>
-                          <span>Total: ${order.fields?.TotalAmount?.toFixed(2)}</span>
+                          <span>Total: ₹{order.fields?.TotalAmount?.toFixed(2)}</span>
                         </div>
                       </div>
                     ))}

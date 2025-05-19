@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useCart } from "@/contexts/CartContext";
+import { toast } from "@/components/ui/use-toast";
 
 interface Product {
   id: string;
@@ -26,6 +28,7 @@ const BarrelCarousel = ({ products }: BarrelCarouselProps) => {
   const [quantity, setQuantity] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const { addToCart } = useCart();
 
   useEffect(() => {
     // Reset selections when active product changes
@@ -76,9 +79,12 @@ const BarrelCarousel = ({ products }: BarrelCarouselProps) => {
   const handleAddToCart = () => {
     if (!selectedSize) return;
     
-    // Here you would add the product to the cart
-    console.log("Added to cart:", {
-      product: products[activeIndex],
+    // Add the product to the cart
+    addToCart({
+      id: products[activeIndex].id,
+      name: products[activeIndex].name,
+      price: products[activeIndex].price,
+      image: products[activeIndex].defaultImage,
       size: selectedSize,
       quantity
     });
@@ -86,6 +92,11 @@ const BarrelCarousel = ({ products }: BarrelCarouselProps) => {
     // Reset selections
     setSelectedSize("");
     setQuantity(1);
+    
+    toast({
+      title: "Added to cart",
+      description: `${products[activeIndex].name} (${selectedSize}) added to cart.`
+    });
   };
 
   const activeProduct = products[activeIndex];
@@ -173,9 +184,9 @@ const BarrelCarousel = ({ products }: BarrelCarouselProps) => {
           <h2 className="text-3xl font-medium">{activeProduct.name}</h2>
           
           <div className="flex items-center space-x-4">
-            <span className="text-2xl font-medium">${activeProduct.price.toFixed(2)}</span>
+            <span className="text-2xl font-medium">₹{activeProduct.price.toFixed(2)}</span>
             {activeProduct.originalPrice && (
-              <span className="text-lg text-gray-500 line-through">${activeProduct.originalPrice.toFixed(2)}</span>
+              <span className="text-lg text-gray-500 line-through">₹{activeProduct.originalPrice.toFixed(2)}</span>
             )}
           </div>
           

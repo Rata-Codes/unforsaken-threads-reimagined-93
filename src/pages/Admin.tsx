@@ -15,7 +15,7 @@ import { getCustomers, getOrders } from "@/lib/airtable";
 import { Users, Package, DollarSign, ShoppingBag } from "lucide-react";
 
 const Admin = () => {
-  const { isAuthenticated, isAdmin } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalCustomers: 0,
@@ -24,7 +24,17 @@ const Admin = () => {
     totalProducts: 4, // Hardcoded for now
   });
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   
+  useEffect(() => {
+    // Check if the user is an admin (username: admincontrol@5678)
+    if (isAuthenticated && user?.fields?.Username === "admincontrol@5678") {
+      setIsAdmin(true);
+    } else {
+      setIsAdmin(false);
+    }
+  }, [isAuthenticated, user]);
+
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/");
@@ -126,7 +136,7 @@ const Admin = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">${stats.totalSales.toFixed(2)}</div>
+                <div className="text-2xl font-bold">₹{stats.totalSales.toFixed(2)}</div>
               </CardContent>
             </Card>
             

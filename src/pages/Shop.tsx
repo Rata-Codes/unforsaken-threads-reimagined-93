@@ -7,8 +7,6 @@ import BarrelCarousel from "@/components/BarrelCarousel";
 import { Filter, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCart } from "@/contexts/CartContext";
 
 // Define mock product data
@@ -190,116 +188,16 @@ const Shop = () => {
     setPriceRange({ min: values[0], max: values[1] });
   };
 
-  // Handle add to cart from barrel view
-  const handleAddToCart = (product: any, size: string) => {
+  // Handle add to cart from grid view
+  const handleGridAddToCart = (product: any, defaultSize = "M") => {
     addToCart({
       id: product.id,
       name: product.name,
       price: product.price,
-      image: product.defaultImage || product.imageDefault,
-      size: size,
+      image: product.imageDefault,
+      size: selectedSize || defaultSize,
       quantity: 1
     });
-  };
-
-  // Custom BarrelCarousel with add to cart functionality
-  const CustomBarrelCarousel = () => {
-    const [activeProduct, setActiveProduct] = useState(0);
-    const [selectedBarrelSize, setSelectedBarrelSize] = useState("M");
-    
-    const handleNext = () => {
-      setActiveProduct((prev) => (prev === carouselProducts.length - 1 ? 0 : prev + 1));
-      setSelectedBarrelSize("M"); // Reset size on product change
-    };
-    
-    const handlePrev = () => {
-      setActiveProduct((prev) => (prev === 0 ? carouselProducts.length - 1 : prev - 1));
-      setSelectedBarrelSize("M"); // Reset size on product change
-    };
-    
-    const product = carouselProducts[activeProduct];
-    
-    return (
-      <div className="container max-w-6xl mx-auto px-4 py-12">
-        <div className="flex flex-col md:flex-row md:items-center gap-8 md:gap-12">
-          {/* Product Image */}
-          <div className="md:w-1/2 relative">
-            <div className="bg-neutral-50 relative aspect-square overflow-hidden">
-              <img
-                src={product.defaultImage}
-                alt={product.name}
-                className="w-full h-full object-cover transition-opacity duration-300"
-              />
-            </div>
-            
-            <div className="absolute bottom-4 right-4 flex gap-2">
-              <button
-                onClick={handlePrev}
-                className="w-10 h-10 bg-white shadow-md flex items-center justify-center"
-              >
-                &lt;
-              </button>
-              <button
-                onClick={handleNext}
-                className="w-10 h-10 bg-white shadow-md flex items-center justify-center"
-              >
-                &gt;
-              </button>
-            </div>
-          </div>
-          
-          {/* Product Details */}
-          <div className="md:w-1/2 space-y-6">
-            <div>
-              <h2 className="text-2xl font-medium">{product.name}</h2>
-              <div className="flex items-center mt-2">
-                <span className="text-xl font-medium">${product.price.toFixed(2)}</span>
-                {product.originalPrice && (
-                  <span className="ml-2 text-gray-400 line-through">${product.originalPrice.toFixed(2)}</span>
-                )}
-              </div>
-            </div>
-            
-            <p className="text-gray-600">{product.description}</p>
-            
-            {/* Size Selection */}
-            <div>
-              <p className="font-medium mb-2">Size</p>
-              <div className="flex gap-2">
-                {product.sizes.map((size) => (
-                  <button
-                    key={size}
-                    className={`w-12 h-12 flex items-center justify-center border ${
-                      selectedBarrelSize === size
-                        ? "border-black bg-black text-white"
-                        : "border-gray-300 hover:border-black"
-                    }`}
-                    onClick={() => setSelectedBarrelSize(size)}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-            </div>
-            
-            {/* Add to Cart Button */}
-            <Button
-              className="w-full py-6 bg-black hover:bg-black/80 text-white"
-              onClick={() => handleAddToCart(product, selectedBarrelSize)}
-            >
-              Add to Cart
-            </Button>
-            
-            {/* Additional Info */}
-            <div className="pt-4 border-t border-gray-200">
-              <p className="text-sm text-gray-500">
-                In Stock: {product.stock} items
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
   };
   
   return (
@@ -336,7 +234,7 @@ const Shop = () => {
         
         {/* Barrel Carousel View */}
         {activeView === 'barrel' && (
-          <CustomBarrelCarousel />
+          <BarrelCarousel products={carouselProducts} />
         )}
         
         {/* Grid View with Filters */}
@@ -404,8 +302,8 @@ const Shop = () => {
                   <h3 className="font-medium mb-3">Price Range</h3>
                   <div className="flex flex-col gap-2 px-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">${priceRange.min}</span>
-                      <span className="text-sm text-muted-foreground">${priceRange.max}</span>
+                      <span className="text-sm text-muted-foreground">₹{priceRange.min}</span>
+                      <span className="text-sm text-muted-foreground">₹{priceRange.max}</span>
                     </div>
                     <Slider
                       defaultValue={[priceRange.min, priceRange.max]}
@@ -441,41 +339,27 @@ const Shop = () => {
             
             {/* Products Grid */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {sortedProducts.map((product) => {
-                // Function to handle add to cart from grid view
-                const handleGridAddToCart = (defaultSize = "M") => {
-                  addToCart({
-                    id: product.id,
-                    name: product.name,
-                    price: product.price,
-                    image: product.imageDefault,
-                    size: selectedSize || defaultSize,
-                    quantity: 1
-                  });
-                };
-                
-                return (
-                  <div key={product.id} className="group relative">
-                    <ProductCard
-                      id={product.id}
-                      name={product.name}
-                      price={product.price}
-                      originalPrice={product.originalPrice || undefined}
-                      imageDefault={product.imageDefault}
-                      imageHover={product.imageHover}
-                      discount={product.discount || undefined}
-                    />
-                    <div className="absolute bottom-0 left-0 right-0 p-2 bg-black text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button 
-                        onClick={() => handleGridAddToCart()}
-                        className="w-full py-1 text-sm"
-                      >
-                        Add to Cart
-                      </button>
-                    </div>
+              {sortedProducts.map((product) => (
+                <div key={product.id} className="group relative">
+                  <ProductCard
+                    id={product.id}
+                    name={product.name}
+                    price={product.price}
+                    originalPrice={product.originalPrice || undefined}
+                    imageDefault={product.imageDefault}
+                    imageHover={product.imageHover}
+                    discount={product.discount || undefined}
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 p-2 bg-black text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button 
+                      onClick={() => handleGridAddToCart(product)}
+                      className="w-full py-1 text-sm"
+                    >
+                      Add to Cart
+                    </button>
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
             
             {/* Empty State */}

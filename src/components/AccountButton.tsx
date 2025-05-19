@@ -15,8 +15,9 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const AccountButton = () => {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const { isAuthenticated, user, logout, isAdmin } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
+  const isAdmin = isAuthenticated && user?.fields?.Username === "admincontrol@5678";
 
   const handleProfileClick = () => {
     navigate("/profile");

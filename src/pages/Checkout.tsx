@@ -126,26 +126,21 @@ const Checkout = () => {
       const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
       const currentDate = new Date();
       
-      console.log("Creating order with data:", {
+      // Make sure TotalQuantity is a number
+      const orderData = {
         OrderID: orderId,
         Products: formatProductsString(cartItems),
-        TotalQuantity: totalQuantity,
-        TotalAmount: total,
+        TotalQuantity: Number(totalQuantity), // Ensure this is a number
+        TotalAmount: Number(total),
         CID: user.fields.CID,
         Date: currentDate.toISOString().split('T')[0],
         Time: currentDate.toTimeString().split(' ')[0]
-      });
+      };
+      
+      console.log("Creating order with data:", orderData);
       
       await createOrder({
-        fields: {
-          OrderID: orderId,
-          Products: formatProductsString(cartItems),
-          TotalQuantity: totalQuantity,
-          TotalAmount: total,
-          CID: user.fields.CID,
-          Date: currentDate.toISOString().split('T')[0],
-          Time: currentDate.toTimeString().split(' ')[0]
-        }
+        fields: orderData
       });
       
       console.log("Order created successfully");
@@ -411,7 +406,7 @@ const Checkout = () => {
                         <p className="text-xs text-gray-500">Size: {item.size}</p>
                         <div className="flex justify-between mt-1 text-sm">
                           <span>× {item.quantity}</span>
-                          <span>${(item.price * item.quantity).toFixed(2)}</span>
+                          <span>₹{(item.price * item.quantity).toFixed(2)}</span>
                         </div>
                       </div>
                     </div>
@@ -423,16 +418,16 @@ const Checkout = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>${(total - (total >= 100 ? 0 : 10)).toFixed(2)}</span>
+                    <span>₹{(total - (total >= 100 ? 0 : 10)).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Shipping</span>
-                    <span>{total >= 100 ? "Free" : "$10.00"}</span>
+                    <span>{total >= 100 ? "Free" : "₹10.00"}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between font-medium">
                     <span>Total</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span>₹{total.toFixed(2)}</span>
                   </div>
                 </div>
                 
