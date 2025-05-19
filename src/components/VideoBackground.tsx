@@ -1,55 +1,96 @@
 
-import { useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface VideoBackgroundProps {
   videoSrc: string;
 }
 
 const VideoBackground = ({ videoSrc }: VideoBackgroundProps) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const navigate = useNavigate();
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.play().catch(error => {
-        console.error("Video autoplay failed:", error);
-      });
-    }
+    const timer = setTimeout(() => {
+      setIsLoaded(true);
+    }, 1000);
+
+    return () => clearTimeout(timer);
   }, []);
 
+  const handleCTA = () => {
+    setHasInteracted(true);
+    setTimeout(() => {
+      navigate("/shop");
+    }, 600);
+  };
+
   return (
-    <div className="relative h-screen w-full overflow-hidden">
-      <div className="absolute inset-0 w-full h-full bg-black z-10 mix-blend-color-dodge opacity-30"></div>
-      
-      <video
-        ref={videoRef}
-        className="absolute inset-0 w-full h-full object-cover filter grayscale contrast-125 blur-[1px]"
-        autoPlay
-        muted
-        loop
-        playsInline
-        poster="/placeholder.svg"
-      >
-        <source src={videoSrc} type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-      
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60 z-10"></div>
-      
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-white z-20 px-4">
-        <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-4 animate-fade-in glitch">TBE</h1>
-        <p className="text-xl md:text-2xl text-center max-w-2xl opacity-0 animate-slide-in" style={{ animationDelay: "0.5s", animationFillMode: "forwards" }}>
-          Minimalist Fashion. Maximum Impact.
-        </p>
-        <button 
-          className="mt-8 px-8 py-3 bg-white text-black uppercase tracking-wider font-medium hover:bg-opacity-90 transition-all duration-300 opacity-0 animate-slide-in"
-          style={{ animationDelay: "0.8s", animationFillMode: "forwards" }}
+    <div className="w-full h-screen relative overflow-hidden">
+      {/* Video Background with filter effects */}
+      <div className="absolute inset-0 video-filter">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="w-full h-full object-cover"
         >
-          Shop Now
-        </button>
+          <source src={videoSrc} type="video/mp4" />
+        </video>
+        
+        {/* Glitch overlay */}
+        <div className="absolute inset-0 z-10 opacity-30 pointer-events-none">
+          <div className="w-full h-full bg-black opacity-10"></div>
+          <div className="absolute inset-0 mix-blend-overlay bg-gradient-to-br from-black/20 to-transparent"></div>
+          <div className="absolute inset-0 mix-blend-color-burn bg-gradient-to-tr from-black/10 to-transparent"></div>
+        </div>
       </div>
-      
-      {/* Scanlines effect */}
-      <div className="absolute inset-0 pointer-events-none z-10 bg-scanlines opacity-10"></div>
+
+      {/* Content */}
+      <div 
+        className={`absolute inset-0 z-20 flex items-center justify-center transition-opacity duration-700 ${
+          isLoaded ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        <div className="text-center text-white px-4 max-w-xl mx-auto">
+          <h1 
+            className={`text-6xl sm:text-7xl font-bold mb-4 tracking-tight ${
+              hasInteracted ? "animate-fade-out" : "animate-fade-in"
+            }`}
+            style={{ textShadow: "0 2px 10px rgba(0,0,0,0.3)" }}
+          >
+            TBE
+          </h1>
+          
+          <p 
+            className={`text-xl sm:text-2xl mb-8 ${
+              hasInteracted ? "animate-fade-out" : "animate-fade-in"
+            }`}
+            style={{ 
+              animationDelay: "0.3s", 
+              animationFillMode: "forwards",
+              textShadow: "0 1px 5px rgba(0,0,0,0.4)" 
+            }}
+          >
+            Minimalist Fashion. Maximum Impact.
+          </p>
+          
+          <button 
+            onClick={handleCTA}
+            className={`px-8 py-3 bg-white text-black uppercase tracking-wider font-medium transition-all hover:bg-black hover:text-white glitch-effect ${
+              hasInteracted ? "animate-fade-out" : "animate-fade-in"
+            }`}
+            style={{ 
+              animationDelay: "0.6s", 
+              animationFillMode: "forwards" 
+            }}
+          >
+            Shop Now
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

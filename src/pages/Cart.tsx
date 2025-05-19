@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { ChevronLeft, Trash } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import AccountDialog from "@/components/AccountDialog";
+import { useToast } from "@/components/ui/use-toast";
 
 interface CartItem {
   id: string;
@@ -20,6 +21,8 @@ interface CartItem {
 
 const Cart = () => {
   const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   
   // Mock cart items - in a real app this would be stored in state management
@@ -64,8 +67,12 @@ const Cart = () => {
       return;
     }
     
+    // Store cart items in sessionStorage for checkout page access
+    sessionStorage.setItem("cartItems", JSON.stringify(cartItems));
+    sessionStorage.setItem("cartTotal", total.toString());
+    
     // Proceed to checkout if authenticated
-    window.location.href = "/checkout";
+    navigate("/checkout");
   };
   
   return (
@@ -81,7 +88,7 @@ const Cart = () => {
               <div className="lg:col-span-2">
                 <div className="space-y-8">
                   {cartItems.map(item => (
-                    <div key={`${item.id}-${item.size}`} className="flex gap-6">
+                    <div key={`${item.id}-${item.size}`} className="flex gap-6 card-hover p-4">
                       <div className="w-24 h-24 bg-neutral-100 flex-shrink-0">
                         <img 
                           src={item.image} 
@@ -138,7 +145,7 @@ const Cart = () => {
               </div>
               
               <div>
-                <div className="bg-neutral-50 p-6">
+                <div className="bg-neutral-50 p-6 card-hover">
                   <h2 className="text-xl font-medium mb-4">Order Summary</h2>
                   
                   <div className="space-y-3 mb-6">
@@ -158,7 +165,7 @@ const Cart = () => {
                   </div>
                   
                   <Button 
-                    className="w-full py-6 bg-black text-white hover:bg-black/90"
+                    className="w-full py-6 bg-black text-white hover:bg-black/90 beat-animation"
                     onClick={handleCheckoutClick}
                   >
                     Proceed to Checkout

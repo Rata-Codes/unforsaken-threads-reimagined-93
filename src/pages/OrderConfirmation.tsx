@@ -1,4 +1,5 @@
 
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -6,9 +7,21 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle, Package, Truck } from "lucide-react";
 
 const OrderConfirmation = () => {
-  // Mock order data - in a real app this would come from the order submission
-  const orderNumber = "TBE-" + Math.floor(10000 + Math.random() * 90000);
-  const orderDate = new Date().toLocaleDateString();
+  const [orderNumber, setOrderNumber] = useState<string>("");
+  const [orderDate] = useState<string>(new Date().toLocaleDateString());
+  
+  useEffect(() => {
+    // Get order ID from session storage
+    const storedOrderId = sessionStorage.getItem("lastOrderId");
+    if (storedOrderId) {
+      setOrderNumber(storedOrderId);
+      // Clear it after reading
+      sessionStorage.removeItem("lastOrderId");
+    } else {
+      // If no order ID, use a fallback
+      setOrderNumber("TBE-" + Math.floor(10000 + Math.random() * 90000));
+    }
+  }, []);
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -16,15 +29,15 @@ const OrderConfirmation = () => {
       
       <main className="flex-grow">
         <div className="container px-4 py-12 max-w-3xl mx-auto text-center">
-          <div className="mb-8">
-            <CheckCircle className="w-16 h-16 mx-auto text-black mb-4" />
+          <div className="mb-8 animate-fade-in">
+            <CheckCircle className="w-16 h-16 mx-auto text-black mb-4 beat-animation" />
             <h1 className="text-3xl font-medium mb-2">Order Confirmed!</h1>
             <p className="text-gray-600">
               Thank you for your purchase. We're getting your order ready to be shipped.
             </p>
           </div>
           
-          <div className="bg-neutral-50 p-8 mb-8 text-left">
+          <div className="bg-neutral-50 p-8 mb-8 text-left card-hover animate-fade-in" style={{ animationDelay: "0.2s" }}>
             <h2 className="text-lg font-medium mb-4">Order Information</h2>
             
             <div className="space-y-4">
@@ -41,7 +54,7 @@ const OrderConfirmation = () => {
             </div>
           </div>
           
-          <div className="mb-8">
+          <div className="mb-8 animate-fade-in" style={{ animationDelay: "0.4s" }}>
             <h2 className="text-lg font-medium mb-4 text-left">Delivery Process</h2>
             
             <div className="flex items-center mb-6">
@@ -74,7 +87,7 @@ const OrderConfirmation = () => {
             </div>
           </div>
           
-          <div className="mb-8">
+          <div className="mb-8 animate-fade-in" style={{ animationDelay: "0.6s" }}>
             <p className="mb-4">
               We'll send you shipping confirmation when your items are on the way!
               If you have any questions, please email us at
@@ -84,11 +97,11 @@ const OrderConfirmation = () => {
             </p>
           </div>
           
-          <div className="flex gap-4 justify-center">
-            <Button asChild>
+          <div className="flex gap-4 justify-center animate-fade-in" style={{ animationDelay: "0.8s" }}>
+            <Button asChild className="hover:scale-105 transition-transform">
               <Link to="/">Return to Home</Link>
             </Button>
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild className="hover:scale-105 transition-transform">
               <Link to="/shop">Continue Shopping</Link>
             </Button>
           </div>

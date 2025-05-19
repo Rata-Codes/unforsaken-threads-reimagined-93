@@ -41,7 +41,7 @@ const NavbarExtended = () => {
       <div className="container px-4 flex justify-between items-center">
         {/* Logo */}
         <Link to="/" className="z-50">
-          <Logo fillColor={isScrolled || isMobileMenuOpen ? "#000000" : "#FFFFFF"} />
+          <Logo color={isScrolled || isMobileMenuOpen ? "#000000" : "#FFFFFF"} />
         </Link>
 
         {/* Desktop Navigation */}

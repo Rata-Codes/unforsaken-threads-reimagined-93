@@ -13,12 +13,23 @@ import { useAuth } from "@/contexts/AuthContext";
 import { generateOrderId, createOrder, updateCustomer } from "@/lib/airtable";
 import { useToast } from "@/components/ui/use-toast";
 
+interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  size: string;
+  quantity: number;
+}
+
 const Checkout = () => {
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [total, setTotal] = useState(0);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -46,49 +57,43 @@ const Checkout = () => {
         ...prev,
         firstName,
         lastName,
+        email: user.fields.Username || "",
         phone: user.fields.Phone || "",
         address: user.fields.Address || "",
       }));
     }
   }, [isAuthenticated, user]);
   
-  // Redirect if not authenticated
+  // Get cart items from session storage
   useEffect(() => {
-    if (!isAuthenticated) {
+    const storedItems = sessionStorage.getItem("cartItems");
+    const storedTotal = sessionStorage.getItem("cartTotal");
+    
+    if (storedItems) {
+      try {
+        setCartItems(JSON.parse(storedItems));
+      } catch (error) {
+        console.error("Error parsing cart items:", error);
+        navigate("/cart");
+      }
+    }
+    
+    if (storedTotal) {
+      setTotal(parseFloat(storedTotal));
+    }
+    
+    // If no items or not authenticated, redirect to cart
+    if (!storedItems || !isAuthenticated) {
       navigate("/cart");
     }
   }, [isAuthenticated, navigate]);
-  
-  // Mock cart data - in a real app this would be from state management
-  const cartItems = [
-    {
-      id: "1",
-      name: "Minimal Heavyweight Hoodie",
-      price: 65,
-      image: "/lovable-uploads/b9ef63f9-198a-44f4-9d09-475b2e17ac6c.png",
-      size: "M",
-      quantity: 1
-    },
-    {
-      id: "2",
-      name: "Modern Oversized Tee",
-      price: 42,
-      image: "/lovable-uploads/bddb910d-c3d0-45f1-9131-cfcbc4f56ec1.png",
-      size: "L",
-      quantity: 2
-    }
-  ];
-  
-  const subtotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-  const shipping = subtotal >= 100 ? 0 : 10;
-  const total = subtotal + shipping;
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
   
-  const formatProductsString = (items: typeof cartItems) => {
+  const formatProductsString = (items: CartItem[]) => {
     const itemsByName: Record<string, { [size: string]: number }> = {};
     
     items.forEach(item => {
@@ -127,12 +132,25 @@ const Checkout = () => {
     setIsProcessing(true);
     
     try {
+      console.log("Starting order creation process...");
+      
       // Generate order ID
       const orderId = generateOrderId();
+      console.log("Generated order ID:", orderId);
       
       // Create order in Airtable
       const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
       const currentDate = new Date();
+      
+      console.log("Creating order with data:", {
+        OrderID: orderId,
+        Products: formatProductsString(cartItems),
+        TotalQuantity: totalQuantity,
+        TotalAmount: total,
+        CID: user.fields.CID,
+        Date: currentDate.toISOString().split('T')[0],
+        Time: currentDate.toTimeString().split(' ')[0]
+      });
       
       await createOrder({
         fields: {
@@ -146,16 +164,28 @@ const Checkout = () => {
         }
       });
       
+      console.log("Order created successfully");
+      
       // Update customer's order IDs
       if (user.id) {
+        console.log("Updating customer order IDs...");
         const existingOrderIds = user.fields.OrderID || "";
         const updatedOrderIds = existingOrderIds 
           ? `${existingOrderIds},${orderId}` 
           : orderId;
         
         await updateCustomer(user.id, { OrderID: updatedOrderIds });
+        console.log("Customer order IDs updated");
       }
       
+      // Clear cart from session storage
+      sessionStorage.removeItem("cartItems");
+      sessionStorage.removeItem("cartTotal");
+      
+      // Store order ID for confirmation page
+      sessionStorage.setItem("lastOrderId", orderId);
+      
+      console.log("Redirecting to confirmation page...");
       // Redirect to confirmation page
       navigate("/confirmation");
       
@@ -171,8 +201,8 @@ const Checkout = () => {
     }
   };
   
-  if (!isAuthenticated) {
-    return null; // Don't render anything while redirecting
+  if (cartItems.length === 0) {
+    return null; // Don't render anything while redirecting or if no items
   }
   
   return (
@@ -371,7 +401,7 @@ const Checkout = () => {
             </div>
             
             <div>
-              <div className="bg-neutral-50 p-6 sticky top-24">
+              <div className="bg-neutral-50 p-6 sticky top-24 card-hover">
                 <h2 className="text-xl font-medium mb-4">Order Summary</h2>
                 
                 <div className="space-y-4 mb-6">
@@ -402,11 +432,11 @@ const Checkout = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>${(total - (total >= 100 ? 0 : 10)).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Shipping</span>
-                    <span>{shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}</span>
+                    <span>{total >= 100 ? "Free" : "$10.00"}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between font-medium">

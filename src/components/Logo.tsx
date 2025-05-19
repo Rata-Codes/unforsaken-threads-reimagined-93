@@ -1,8 +1,14 @@
 
-const Logo = () => {
+import React from "react";
+
+interface LogoProps {
+  color?: string;
+}
+
+const Logo = ({ color = "#000000" }: LogoProps) => {
   return (
-    <div className="flex items-center">
-      <span className="text-2xl font-bold uppercase">TBE</span>
+    <div className="text-2xl font-bold tracking-tighter" style={{ color }}>
+      TBE
     </div>
   );
 };
