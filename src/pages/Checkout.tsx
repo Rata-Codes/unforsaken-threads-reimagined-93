@@ -133,8 +133,6 @@ const Checkout = () => {
         TotalQuantity: String(totalQuantity), // Ensure this is a string
         TotalAmount: Number(total),
         CID: user.fields.CID,
-        Date: currentDate.toISOString().split('T')[0],
-        Time: currentDate.toTimeString().split(' ')[0]
       };
       
       console.log("Creating order with data:", orderData);
