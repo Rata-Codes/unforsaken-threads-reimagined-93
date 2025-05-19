@@ -121,18 +121,13 @@ const Checkout = () => {
       const orderId = generateOrderId();
       console.log("Generated order ID:", orderId);
       
-      // Create order in Airtable
-      const currentDate = new Date();
-      const formattedDate = currentDate.toISOString().split('T')[0];
-      const formattedTime = currentDate.toTimeString().split(' ')[0];
+   
       
       const orderData = {
         OrderID: orderId,
         Products: formatProductsString(cartItems),
         TotalAmount: Number(total),
         CID: user.fields.CID,
-        Date: formattedDate,
-        Time: formattedTime
       };
       
       console.log("Creating order with data:", orderData);
