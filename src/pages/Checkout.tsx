@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -9,9 +9,55 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { ChevronLeft } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { generateOrderId, createOrder, updateCustomer } from "@/lib/airtable";
+import { useToast } from "@/components/ui/use-toast";
 
 const Checkout = () => {
+  const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [paymentMethod, setPaymentMethod] = useState("card");
+  const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    cardNumber: "",
+    expiry: "",
+    cvc: ""
+  });
+  
+  // Pre-fill form with user data if authenticated
+  useEffect(() => {
+    if (isAuthenticated && user?.fields) {
+      const nameParts = (user.fields.Name || "").split(" ");
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.slice(1).join(" ") || "";
+      
+      setFormData(prev => ({
+        ...prev,
+        firstName,
+        lastName,
+        phone: user.fields.Phone || "",
+        address: user.fields.Address || "",
+      }));
+    }
+  }, [isAuthenticated, user]);
+  
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/cart");
+    }
+  }, [isAuthenticated, navigate]);
   
   // Mock cart data - in a real app this would be from state management
   const cartItems = [
@@ -37,13 +83,97 @@ const Checkout = () => {
   const shipping = subtotal >= 100 ? 0 : 10;
   const total = subtotal + shipping;
   
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Here you would handle the checkout process
-    console.log("Processing order...");
-    // Redirect to confirmation page after successful checkout
-    window.location.href = "/confirmation";
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
+  
+  const formatProductsString = (items: typeof cartItems) => {
+    const itemsByName: Record<string, { [size: string]: number }> = {};
+    
+    items.forEach(item => {
+      if (!itemsByName[item.name]) {
+        itemsByName[item.name] = {};
+      }
+      
+      if (!itemsByName[item.name][item.size]) {
+        itemsByName[item.name][item.size] = 0;
+      }
+      
+      itemsByName[item.name][item.size] += item.quantity;
+    });
+    
+    return Object.entries(itemsByName).map(([name, sizes]) => {
+      const sizesString = Object.entries(sizes)
+        .map(([size, quantity]) => `${size} - ${quantity}N`)
+        .join(", ");
+      
+      return `${name} [${sizesString}]`;
+    }).join(", ");
+  };
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!isAuthenticated || !user?.fields?.CID) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to complete your purchase.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsProcessing(true);
+    
+    try {
+      // Generate order ID
+      const orderId = generateOrderId();
+      
+      // Create order in Airtable
+      const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+      const currentDate = new Date();
+      
+      await createOrder({
+        fields: {
+          OrderID: orderId,
+          Products: formatProductsString(cartItems),
+          TotalQuantity: totalQuantity,
+          TotalAmount: total,
+          CID: user.fields.CID,
+          Date: currentDate.toISOString().split('T')[0],
+          Time: currentDate.toTimeString().split(' ')[0]
+        }
+      });
+      
+      // Update customer's order IDs
+      if (user.id) {
+        const existingOrderIds = user.fields.OrderID || "";
+        const updatedOrderIds = existingOrderIds 
+          ? `${existingOrderIds},${orderId}` 
+          : orderId;
+        
+        await updateCustomer(user.id, { OrderID: updatedOrderIds });
+      }
+      
+      // Redirect to confirmation page
+      navigate("/confirmation");
+      
+    } catch (error) {
+      console.error("Error processing order:", error);
+      toast({
+        title: "Order processing failed",
+        description: "There was a problem processing your order. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+  
+  if (!isAuthenticated) {
+    return null; // Don't render anything while redirecting
+  }
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -63,41 +193,99 @@ const Checkout = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="firstName">First Name</Label>
-                      <Input id="firstName" required className="mt-1" />
+                      <Input 
+                        id="firstName"
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleInputChange}
+                        required 
+                        className="mt-1" 
+                      />
                     </div>
                     <div>
                       <Label htmlFor="lastName">Last Name</Label>
-                      <Input id="lastName" required className="mt-1" />
+                      <Input 
+                        id="lastName" 
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleInputChange}
+                        required 
+                        className="mt-1" 
+                      />
                     </div>
                   </div>
                   
                   <div className="mt-4">
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" required className="mt-1" />
+                    <Input 
+                      id="email" 
+                      name="email"
+                      type="email" 
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required 
+                      className="mt-1" 
+                    />
                   </div>
                   
                   <div className="mt-4">
                     <Label htmlFor="phone">Phone</Label>
-                    <Input id="phone" type="tel" required className="mt-1" />
+                    <Input 
+                      id="phone" 
+                      name="phone"
+                      type="tel" 
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      required 
+                      className="mt-1" 
+                    />
                   </div>
                   
                   <div className="mt-4">
                     <Label htmlFor="address">Address</Label>
-                    <Input id="address" required className="mt-1" />
+                    <Input 
+                      id="address" 
+                      name="address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      required 
+                      className="mt-1" 
+                    />
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                     <div>
                       <Label htmlFor="city">City</Label>
-                      <Input id="city" required className="mt-1" />
+                      <Input 
+                        id="city" 
+                        name="city"
+                        value={formData.city}
+                        onChange={handleInputChange}
+                        required 
+                        className="mt-1" 
+                      />
                     </div>
                     <div>
                       <Label htmlFor="state">State</Label>
-                      <Input id="state" required className="mt-1" />
+                      <Input 
+                        id="state" 
+                        name="state"
+                        value={formData.state}
+                        onChange={handleInputChange}
+                        required 
+                        className="mt-1" 
+                      />
                     </div>
                     <div>
                       <Label htmlFor="zipCode">Zip Code</Label>
-                      <Input id="zipCode" required className="mt-1" />
+                      <Input 
+                        id="zipCode" 
+                        name="zipCode"
+                        value={formData.zipCode}
+                        onChange={handleInputChange}
+                        required 
+                        className="mt-1" 
+                      />
                     </div>
                   </div>
                 </div>
@@ -126,16 +314,40 @@ const Checkout = () => {
                     <div className="mt-4 space-y-4">
                       <div>
                         <Label htmlFor="cardNumber">Card Number</Label>
-                        <Input id="cardNumber" placeholder="•••• •••• •••• ••••" required className="mt-1" />
+                        <Input 
+                          id="cardNumber" 
+                          name="cardNumber"
+                          placeholder="•••• •••• •••• ••••" 
+                          value={formData.cardNumber}
+                          onChange={handleInputChange}
+                          required 
+                          className="mt-1" 
+                        />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="expiry">Expiry Date</Label>
-                          <Input id="expiry" placeholder="MM/YY" required className="mt-1" />
+                          <Input 
+                            id="expiry" 
+                            name="expiry"
+                            placeholder="MM/YY" 
+                            value={formData.expiry}
+                            onChange={handleInputChange}
+                            required 
+                            className="mt-1" 
+                          />
                         </div>
                         <div>
                           <Label htmlFor="cvc">CVC</Label>
-                          <Input id="cvc" placeholder="•••" required className="mt-1" />
+                          <Input 
+                            id="cvc" 
+                            name="cvc"
+                            placeholder="•••" 
+                            value={formData.cvc}
+                            onChange={handleInputChange}
+                            required 
+                            className="mt-1" 
+                          />
                         </div>
                       </div>
                     </div>
@@ -150,8 +362,9 @@ const Checkout = () => {
                   <Button 
                     type="submit"
                     className="bg-black text-white hover:bg-black/90 px-8"
+                    disabled={isProcessing}
                   >
-                    Complete Order
+                    {isProcessing ? "Processing..." : "Complete Order"}
                   </Button>
                 </div>
               </form>

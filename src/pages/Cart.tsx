@@ -6,6 +6,8 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ChevronLeft, Trash } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import AccountDialog from "@/components/AccountDialog";
 
 interface CartItem {
   id: string;
@@ -17,6 +19,9 @@ interface CartItem {
 }
 
 const Cart = () => {
+  const { isAuthenticated } = useAuth();
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  
   // Mock cart items - in a real app this would be stored in state management
   const [cartItems, setCartItems] = useState<CartItem[]>([
     {
@@ -52,6 +57,16 @@ const Cart = () => {
   const subtotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
   const shipping = subtotal >= 100 ? 0 : 10;
   const total = subtotal + shipping;
+  
+  const handleCheckoutClick = () => {
+    if (!isAuthenticated) {
+      setShowAuthDialog(true);
+      return;
+    }
+    
+    // Proceed to checkout if authenticated
+    window.location.href = "/checkout";
+  };
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -144,9 +159,9 @@ const Cart = () => {
                   
                   <Button 
                     className="w-full py-6 bg-black text-white hover:bg-black/90"
-                    asChild
+                    onClick={handleCheckoutClick}
                   >
-                    <Link to="/checkout">Proceed to Checkout</Link>
+                    Proceed to Checkout
                   </Button>
                   
                   <p className="text-sm text-gray-500 mt-4 text-center">
@@ -168,6 +183,12 @@ const Cart = () => {
       </main>
       
       <Footer />
+      
+      <AccountDialog 
+        isOpen={showAuthDialog}
+        onClose={() => setShowAuthDialog(false)}
+        redirectAfterLogin="/checkout"
+      />
     </div>
   );
 };

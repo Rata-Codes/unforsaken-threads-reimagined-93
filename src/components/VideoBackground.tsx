@@ -18,9 +18,11 @@ const VideoBackground = ({ videoSrc }: VideoBackgroundProps) => {
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
+      <div className="absolute inset-0 w-full h-full bg-black z-10 mix-blend-color-dodge opacity-30"></div>
+      
       <video
         ref={videoRef}
-        className="absolute inset-0 w-full h-full object-cover"
+        className="absolute inset-0 w-full h-full object-cover filter grayscale contrast-125 blur-[1px]"
         autoPlay
         muted
         loop
@@ -30,8 +32,11 @@ const VideoBackground = ({ videoSrc }: VideoBackgroundProps) => {
         <source src={videoSrc} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
-      <div className="absolute inset-0 bg-black bg-opacity-30 flex flex-col items-center justify-center text-white px-4">
-        <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-4 animate-fade-in">TBE</h1>
+      
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/60 z-10"></div>
+      
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-white z-20 px-4">
+        <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-4 animate-fade-in glitch">TBE</h1>
         <p className="text-xl md:text-2xl text-center max-w-2xl opacity-0 animate-slide-in" style={{ animationDelay: "0.5s", animationFillMode: "forwards" }}>
           Minimalist Fashion. Maximum Impact.
         </p>
@@ -42,6 +47,9 @@ const VideoBackground = ({ videoSrc }: VideoBackgroundProps) => {
           Shop Now
         </button>
       </div>
+      
+      {/* Scanlines effect */}
+      <div className="absolute inset-0 pointer-events-none z-10 bg-scanlines opacity-10"></div>
     </div>
   );
 };
