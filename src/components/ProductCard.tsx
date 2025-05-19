@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
   id: string;
@@ -22,6 +23,7 @@ const ProductCard = ({
   discount
 }: ProductCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
 
   return (
     <div 
@@ -30,16 +32,22 @@ const ProductCard = ({
       onMouseLeave={() => setIsHovered(false)}
     >
       <Link to={`/product/${id}`} className="block">
-        <div className="product-image-container aspect-[3/4] overflow-hidden bg-neutral-100 mb-4">
+        <div className="product-image-container aspect-[3/4] overflow-hidden bg-neutral-100 mb-4 relative">
           <img 
             src={imageDefault} 
             alt={name}
-            className="product-image-default w-full h-full object-cover transition-all duration-700"
+            className={cn(
+              "product-image-default w-full h-full object-cover transition-all duration-700",
+              isHovered ? "opacity-0" : "opacity-100"
+            )}
           />
           <img 
             src={imageHover} 
             alt={`${name} on model`}
-            className="product-image-hover w-full h-full object-cover transition-all duration-700"
+            className={cn(
+              "product-image-hover absolute inset-0 w-full h-full object-cover transition-all duration-700",
+              isHovered ? "opacity-100" : "opacity-0"
+            )}
           />
           
           {discount && (
@@ -47,10 +55,28 @@ const ProductCard = ({
               SAVE {discount}%
             </div>
           )}
+          
+          <div 
+            className={cn(
+              "absolute bottom-0 left-0 right-0 bg-black bg-opacity-0 p-3 transform translate-y-full transition-all duration-300",
+              isHovered ? "translate-y-0 bg-opacity-70" : ""
+            )}
+          >
+            <button 
+              className="w-full bg-white text-black text-xs uppercase tracking-wider py-2 hover:bg-neutral-200 transition-colors"
+              onClick={(e) => {
+                e.preventDefault();
+                setIsAddingToCart(true);
+                setTimeout(() => setIsAddingToCart(false), 1000);
+              }}
+            >
+              {isAddingToCart ? "Added!" : "Quick Add"}
+            </button>
+          </div>
         </div>
         
         <div className="text-left">
-          <h3 className="text-sm font-medium uppercase mb-1">{name}</h3>
+          <h3 className="text-sm font-medium uppercase mb-1 tracking-wider">{name}</h3>
           <div className="flex items-center gap-2">
             <p className="text-sm font-medium">${price.toFixed(2)}</p>
             {originalPrice && (
